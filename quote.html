@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+        }
+        .card {
+            width: 300px;
+            height: 200px;
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+        .inner-card {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .inner-card.flipped {
+            transform: rotateY(180deg);
+        }
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .front {
+            z-index: 2;
+        }
+        .back {
+            transform: rotateY(180deg);
+        }
+        #new-quote {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #new-quote:hover {
+            background-color: #555;
+        }
+        #quote, #author {
+            margin: 0;
+        }
+        
+
+        #today {
+            width: 900px;
+            height: 50px;
+            background-color: #f9f9f9;
+            border: 2px solid #333;
+            padding: 20px;
+            margin: 20px;
+            font-family: Arial, sans-serif;
+            color: #000000;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+
+
+
+    </style>
+</head>
+<body>
+    
+    <div id="today" >
+        <b>Quote of the day</b>
+        <div id="day"></div>
+    </div>
+    <div class="card" id="quote-container">
+        <div class="inner-card" id="inner-card">
+            <div class="front">
+                <div>
+                    <div id="quote">Click the button to generate a quote.</div>
+                    <div id="author"></div>
+                </div>
+            </div>
+            <div class="back">
+                <div>
+                    <div id="quote-back">Click the button to generate a quote.</div>
+                    <div id="author-back"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="new-quote">New Quote</button>
+
+    <script>
+        document.getElementById('new-quote').addEventListener('click', function() {
+            var card = document.getElementById('inner-card');
+            const quoteText = document.getElementById('quote');
+    		const authorText = document.getElementById('author');
+    		const newQuoteBtn = document.getElementById('new-quote');
+            const dayquote=document.getElementById('day');
+            
+    		async function getQuote() {
+		        try {
+		            const response = await fetch('http://127.0.0.1:5000/quote');
+		            const data = await response.json();
+		            displayQuote(data.quote, data.author);
+		        } catch (error) {
+		            displayError(error);
+		        }
+		    }
+            
+		    function displayQuote(quote, author) {
+		        if (card.classList.contains('flipped')) {
+                document.getElementById('quote-back').innerText = `"${quote}"`;; 
+                document.getElementById('author-back').innerText = `- ${author}`; 
+            } else {
+                document.getElementById('quote').innerText = `"${quote}"`;
+                document.getElementById('author').innerText = `- ${author}`; 
+            }
+		    }
+		    function displayError(message) {
+		    	alert(message);
+        	}
+    		
+            card.classList.toggle('flipped');
+            getQuote();
+            
+            
+            
+        });
+        async function dayQuote() {
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/quoteoftheday');
+                    const data = await response.json();
+                    document.getElementById('day').innerText = `"${data.quote}"`;
+
+                    
+                } catch (error) {
+                    displayError(error);
+                }
+            }
+            dayQuote();
+    </script>
+
+</body>
+</html>

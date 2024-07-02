@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+        }
+        #search-container {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        #search-icon {
+            cursor: pointer;
+            font-size: 1.5em;
+        }
+        #search-input {
+            display: none;
+            margin-left: 10px;
+            padding: 5px;
+            font-size: 1em;
+        }
+        #search-btn {
+            display: none;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 5px;
+        }
+        #search-btn:hover {
+            background-color: #555;
+        }
+        .card {
+            width: 300px;
+            height: 200px;
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+        .inner-card {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .inner-card.flipped {
+            transform: rotateY(180deg);
+        }
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .front {
+            z-index: 2;
+        }
+        .back {
+            transform: rotateY(180deg);
+        }
+        #quote, #author {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="search-container">
+        <span id="search-icon">&#128269;</span>
+        <input type="text" id="search-input" placeholder="Enter author name">
+        <button id="search-btn">Search</button>
+    </div>
+
+    <div class="card" id="quote-container">
+        <div class="inner-card" id="inner-card">
+            <div class="front">
+                <div>
+                    <div id="quote">Search for an author</div>
+                    <div id="author"></div>
+                </div>
+            </div>
+            <div class="back">
+                <div>
+                    <div id="quote-back">Search for an author</div>
+                    <div id="author-back"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('search-icon').addEventListener('click', function() {
+            var searchInput = document.getElementById('search-input');
+            var searchBtn = document.getElementById('search-btn');
+            if (searchInput.style.display === 'none') {
+                searchInput.style.display = 'inline';
+                searchBtn.style.display = 'inline';
+            } else {
+                searchInput.style.display = 'none';
+                searchBtn.style.display = 'none';
+            }
+        });
+
+        document.getElementById('search-btn').addEventListener('click', async function() {
+            var author = document.getElementById('search-input').value;
+            var card = document.getElementById('inner-card');
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/searchquote`,{
+                        method: 'POST',                
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(author)      
+                    });
+                const data = await response.json();
+                
+                    const quote = data
+                    if(data.code==10){
+                        alert(data.error)
+                    }
+                    if(data.code==11){
+                        alert(data.error)
+                    }
+                    card.classList.toggle('flipped');
+                    if (card.classList.contains('flipped')) {
+                        document.getElementById('quote-back').innerText = `"${data.quote}"`;
+                        document.getElementById('author-back').innerText = `- ${data.author}`;
+                    } else {
+                        document.getElementById('quote').innerText = `"${data.quote}"`;
+                        document.getElementById('author').innerText = `- ${data.author}`;
+                    }
+            
+                
+            } catch (error) {
+                alert(error);
+            }
+        });
+    </script>
+
+</body>
+</html>
